@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SPACE JUMPER - Mobile & PC Game</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Vibrant 3D Glossy Button Styling */
+        .btn-glossy {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 1rem;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -3px 0 rgba(0,0,0,0.2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .btn-glossy:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 8px 0 rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(0,0,0,0.2);
+        }
+        .btn-glossy:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        /* Specific Button Themes */
+        .btn-yellow {
+            background: linear-gradient(180deg, #ffe100 0%, #ff9900 100%);
+            color: #3a1c00;
+            border: 2px solid #fff275;
+        }
+        .btn-blue {
+            background: linear-gradient(180deg, #00d2ff 0%, #0066ff 100%);
+            color: #ffffff;
+            border: 2px solid #80e5ff;
+        }
+        .btn-green {
+            background: linear-gradient(180deg, #2ecc71 0%, #109346 100%);
+            color: #ffffff;
+            border: 2px solid #abf7c8;
+        }
+        .btn-pink {
+            background: linear-gradient(180deg, #ff007f 0%, #aa0055 100%);
+            color: #ffffff;
+            border: 2px solid #ff80bf;
+        }
+        .btn-orange {
+            background: linear-gradient(180deg, #ff6b00 0%, #cc3700 100%);
+            color: #ffffff;
+            border: 2px solid #ffb380;
+        }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Pulsing Glow Animation */
+        @keyframes neonPulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(0,210,255,0.6)); }
+            50% { filter: drop-shadow(0 0 18px rgba(0,210,255,0.95)); }
+        }
+        .neon-glow {
+            animation: neonPulse 2.5s infinite ease-in-out;
+        }
+
+        /* Canvas Fullscreen Container */
+        #gameCanvas {
+            touch-action: none;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Custom Scrollbar for Garage */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,210,255,0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-full w-full bg-slate-950 overflow-hidden text-white flex flex-col justify-center items-center">
+
+    <!-- Main Game Canvas -->
+    <canvas id="gameCanvas" class="absolute inset-0 z-0"></canvas>
+
+    <!-- Overlay UI Layer Container -->
+    <div id="uiLayer" class="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 overflow-hidden">
+        
+        <!-- ================= MAIN MENU SCREEN ================= -->
+        <div id="menuScreen" class="pointer-events-auto flex flex-col items-center justify-center w-full h-full text-center transition-opacity duration-300">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-md w-full flex flex-col items-center space-y-6 border border-cyan-500/30">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold tracking-widest border border-cyan-500/40 uppercase">
+                        <i class="fa-solid fa-rocket animate-bounce"></i>
+                        <span>Aventura Espacial</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl font-extrabold font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-cyan-300 to-pink-500 neon-glow">
+                        SPACE JUMPER
+                    </h1>
+                    <p class="text-slate-300 text-sm sm:text-base font-medium">¡Sube a la cima del cosmos y demuestra tus conocimientos!</p>
+                </div>
+
+                <!-- High Score Badge -->
+                <div class="w-full bg-slate-900/80 rounded-2xl p-3 border border-slate-700/60 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-xs text-slate-400 uppercase font-semibold">RRecord Personal</div>
+                            <div id="menuHighScore" class="text-xl font-bold font-orbitron text-yellow-300">0 m</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-amber-500/30">
+                        <i class="fa-solid fa-coins text-amber-400"></i>
+                        <span id="menuCoinBalance" class="font-orbitron font-bold text-amber-300">0</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="w-full space-y-3 pt-2">
+                    <button id="btnPlay" class="btn-glossy btn-yellow w-full py-4 text-xl sm:text-2xl space-x-3">
+                        <i class="fa-solid fa-play"></i>
+                        <span>INICIAR JUEGO</span>
+                    </button>
+                    <button id="btnGarage" class="btn-glossy btn-blue w-full py-3 text-lg space-x-2">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span>GARAJE / SHOP</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GARAGE / SHIP SHOP SCREEN ================= -->
+        <div id="garageScreen" class="pointer-events-auto hidden flex flex-col items-center justify-center w-full h-full transition-opacity duration-300">
+            <div class="glass-panel p-5 sm:p-6 rounded-3xl max-w-xl w-full flex flex-col h-[85vh] max-h-[650px] border border-blue-500/30">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-xl">
+                            <i class="fa-solid fa-rocket"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold font-orbitron text-cyan-300">GARAJE ESPACIAL</h2>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-amber-500/40">
+                        <i class="fa-solid fa-coins text-amber-400"></i>
+                        <span id="garageCoinBalance" class="font-orbitron font-bold text-amber-300 text-lg">0</span>
+                    </div>
+                </div>
+
+                <!-- Ships Carousel Grid -->
+                <div id="shipsContainer" class="flex-1 overflow-y-auto space-y-4 pr-1">
+                    <!-- Dynamic Ships list injected via JS -->
+                </div>
+
+                <!-- Footer / Return Button -->
+                <div class="pt-4 border-t border-slate-700/60 mt-2">
+                    <button id="btnBackToMenu" class="btn-glossy btn-orange w-full py-3 text-lg space-x-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>VOLVER AL MENÚ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GAMEPLAY HUD OVERLAY ================= -->
+        <div id="hudOverlay" class="hidden flex-col justify-between w-full h-full pointer-events-none">
+            <!-- Top HUD Bar -->
+            <div class="flex justify-between items-start w-full">
+                <!-- Height & Zone Badge -->
+                <div class="glass-panel px-4 py-2 rounded-2xl flex flex-col items-start space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-mountain-sun text-cyan-400"></i>
+                        <span id="hudHeight" class="text-2xl font-black font-orbitron text-cyan-300">0 m</span>
+                    </div>
+                    <span id="hudZone" class="text-xs font-bold text-slate-300 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700">Tierra</span>
+                </div>
+
+                <!-- Coins & Trivia Timer Badge -->
+                <div class="flex flex-col items-end space-y-2">
+                    <!-- Coin Counter -->
+                    <div class="glass-panel px-4 py-2 rounded-2xl flex items-center space-x-2">
+                        <i class="fa-solid fa-coins text-amber-400 text-xl"></i>
+                        <span id="hudCoins" class="text-xl font-bold font-orbitron text-amber-300">0</span>
+                    </div>
+
+                    <!-- Trivia Countdown Badge -->
+                    <div id="hudTriviaTimerBox" class="glass-panel px-3 py-1.5 rounded-xl flex items-center space-x-2 border border-purple-500/40">
+                        <i class="fa-solid fa-circle-question text-purple-400 animate-pulse"></i>
+                        <div class="text-xs font-bold">
+                            TRIVIA EN: <span id="hudTriviaCountdown" class="text-purple-300 font-orbitron">15s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Super Turbo HUD Banner (Active when Turbo is ON) -->
+            <div id="hudTurboBanner" class="hidden self-center glass-panel px-6 py-2 rounded-2xl border-2 border-yellow-400 flex flex-col items-center space-y-1 neon-glow">
+                <div class="flex items-center space-x-2 text-yellow-300 font-extrabold font-orbitron text-lg tracking-wider">
+                    <i class="fa-solid fa-bolt animate-bounce"></i>
+                    <span>¡SUPER TURBO BOOST!</span>
+                </div>
+                <div class="w-48 bg-slate-800 rounded-full h-2.5 overflow-hidden border border-amber-500/40">
+                    <div id="hudTurboBar" class="bg-gradient-to-r from-yellow-400 via-amber-300 to-red-500 h-full w-full transition-all duration-100"></div>
+                </div>
+            </div>
+
+            <!-- Bottom HUD Controls & Jump Battery -->
+            <div class="flex flex-col items-center space-y-3 w-full pb-2">
+                <!-- Jump Batteries Meter ("Límite de Salto") -->
+                <div class="glass-panel px-4 py-2 rounded-2xl flex items-center space-x-3 border border-emerald-500/30">
+                    <span class="text-xs font-bold text-emerald-400 uppercase font-orbitron">Batería de Salto:</span>
+                    <div class="flex space-x-1.5">
+                        <div id="battery1" class="w-6 h-8 rounded-md bg-emerald-400 border border-emerald-200 shadow-lg shadow-emerald-500/50"></div>
+                        <div id="battery2" class="w-6 h-8 rounded-md bg-emerald-400 border border-emerald-200 shadow-lg shadow-emerald-500/50"></div>
+                        <div id="battery3" class="w-6 h-8 rounded-md bg-emerald-400 border border-emerald-200 shadow-lg shadow-emerald-500/50"></div>
+                    </div>
+                </div>
+
+                <!-- On-Screen Mobile Touch Controls -->
+                <div id="touchControls" class="pointer-events-auto flex justify-between items-center w-full max-w-lg px-2">
+                    <div class="flex space-x-3">
+                        <button id="btnTouchLeft" class="btn-glossy btn-blue w-16 h-16 text-2xl rounded-2xl active:scale-95">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <button id="btnTouchRight" class="btn-glossy btn-blue w-16 h-16 text-2xl rounded-2xl active:scale-95">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <button id="btnTouchJump" class="btn-glossy btn-green px-6 h-16 text-lg rounded-2xl space-x-2 active:scale-95">
+                        <i class="fa-solid fa-angles-up text-xl"></i>
+                        <span>SALTAR</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TRIVIA QUESTION MODAL ================= -->
+        <div id="triviaModal" class="hidden pointer-events-auto fixed inset-0 bg-slate-950/80 backdrop-blur-md z-30 flex items-center justify-center p-4">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-lg w-full flex flex-col items-center space-y-5 border-2 border-purple-500/50 shadow-2xl relative overflow-hidden">
+                <!-- Top Timer Bar -->
+                <div class="w-full bg-slate-800/80 rounded-full h-3 overflow-hidden border border-purple-500/30">
+                    <div id="triviaTimerBar" class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 h-full w-full transition-all duration-100"></div>
+                </div>
+
+                <div class="flex items-center space-x-2 text-purple-300 font-bold font-orbitron text-sm uppercase tracking-wider">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Desafío de Ciencias de la Tierra</span>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="triviaQuestionText" class="text-xl sm:text-2xl font-bold text-center text-white leading-relaxed">
+                    ¿Cargando pregunta...?
+                </h3>
+
+                <!-- Options List -->
+                <div id="triviaOptionsContainer" class="w-full space-y-3">
+                    <!-- Injected options -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GAME OVER STATS SCREEN ================= -->
+        <div id="gameOverScreen" class="hidden pointer-events-auto flex flex-col items-center justify-center w-full h-full">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-md w-full flex flex-col items-center space-y-5 border border-red-500/40">
+                <div class="space-y-1 text-center">
+                    <div class="w-16 h-16 rounded-full bg-red-500/20 text-red-500 text-3xl mx-auto flex items-center justify-center mb-2 border border-red-500/40">
+                        <i class="fa-solid fa-burst"></i>
+                    </div>
+                    <h2 class="text-3xl font-black font-orbitron text-red-400">FIN DEL JUEGO</h2>
+                    <p class="text-slate-300 text-xs font-semibold">¡Sigue entrenando para volar más alto!</p>
+                </div>
+
+                <!-- Detailed Stats Grid -->
+                <div class="w-full bg-slate-900/90 rounded-2xl p-4 border border-slate-700/60 space-y-3">
+                    <div class="flex justify-between items-center text-sm border-b border-slate-800 pb-2">
+                        <span class="text-slate-400"><i class="fa-solid fa-mountain-sun text-cyan-400 mr-2"></i>Altura Alcanzada:</span>
+                        <span id="goStatHeight" class="font-bold font-orbitron text-cyan-300">0 m</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm border-b border-slate-800 pb-2">
+                        <span class="text-slate-400"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Respuestas Correctas:</span>
+                        <span id="goStatTrivia" class="font-bold font-orbitron text-emerald-300">0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm border-b border-slate-800 pb-2">
+                        <span class="text-slate-400"><i class="fa-solid fa-coins text-amber-400 mr-2"></i>Monedas de la Partida:</span>
+                        <span id="goStatCoins" class="font-bold font-orbitron text-amber-300">+0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-400"><i class="fa-solid fa-wallet text-indigo-400 mr-2"></i>Total Monedas:</span>
+                        <span id="goStatTotalCoins" class="font-bold font-orbitron text-indigo-300">0</span>
+                    </div>
+                </div>
+
+                <!-- Missing Coins Banner for Next Ship -->
+                <div id="goMissingCoinsBanner" class="w-full bg-purple-950/60 rounded-xl p-3 border border-purple-500/30 text-center text-xs font-semibold text-purple-200">
+                    Calculando oferta de garaje...
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="w-full space-y-2.5 pt-1">
+                    <button id="btnGoRetry" class="btn-glossy btn-yellow w-full py-3.5 text-lg space-x-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>REINTENTAR</span>
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btnGoGarage" class="btn-glossy btn-blue py-3 text-sm space-x-1">
+                            <i class="fa-solid fa-warehouse"></i>
+                            <span>GARAJE</span>
+                        </button>
+                        <button id="btnGoMenu" class="btn-glossy btn-orange py-3 text-sm space-x-1">
+                            <i class="fa-solid fa-house"></i>
+                            <span>MENÚ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Notification Toast Banner -->
+        <div id="toastNotification" class="hidden pointer-events-none fixed top-6 left-1/2 transform -translate-x-1/2 z-50 glass-panel px-6 py-3 rounded-2xl border-2 border-amber-400 text-amber-300 font-bold font-orbitron text-center shadow-2xl flex items-center space-x-3 transition-all duration-300">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <span id="toastMessage">¡Notificación!</span>
+        </div>
+
+    </div>
+
+    <script>
+        /* ===================================================================
+           1. SAFE LOCAL STORAGE & PERSISTENCE
+           =================================================================== */
+        const STORAGE_KEY = 'SPACE_JUMPER_DATA_V2';
+
+        function loadData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) return JSON.parse(stored);
+            } catch (e) {
+                console.warn('LocalStorage unavailable:', e);
+            }
+            return {
+                coins: 0,
+                highScore: 0,
+                unlockedShips: [1], // Default Ship 1 unlocked
+                equippedShip: 1,
+                totalTriviaCorrect: 0
+            };
+        }
+
+        function saveData(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.warn('LocalStorage save failed:', e);
+            }
+        }
+
+        let appData = loadData();
+
+        /* ===================================================================
+           2. WEBAUDIO SYNTHESIZER SOUND ENGINE
+           =================================================================== */
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+
+                if (type === 'jump') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (type === 'spring') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(900, now + 0.1);
+                    osc.frequency.linearRampToValueAtTime(450, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'coin') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(987.77, now); // B5
+                    osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'correct') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                        gain.gain.setValueAtTime(0.25, now + i * 0.06);
+                        gain.gain.linearRampToValueAtTime(0.01, now + i * 0.06 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.06);
+                        osc.stop(now + i * 0.06 + 0.2);
+                    });
+                } else if (type === 'explosion' || type === 'wrong') {
+                    // White noise buffer burst
+                    const bufferSize = audioCtx.sampleRate * 0.35;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(800, now);
+                    filter.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+
+                    const gain = audioCtx.createGain();
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    noise.start(now);
+                } else if (type === 'turbo') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.4);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            } catch(e) {
+                console.warn('Audio play error:', e);
+            }
+        }
+
+        /* ===================================================================
+           3. EARTH SCIENCE QUESTION DATABASE (30 Questions in Spanish)
+           =================================================================== */
+        const EARTH_QUESTIONS = [
+            { q: "¿Cuál es la capa de la Tierra sobre la que vivimos?", options: ["Corteza", "Manto", "Núcleo", "Litósfera Externa"], correct: 0 },
+            { q: "¿Qué gas es el más abundante en la atmósfera terrestre?", options: ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Argón"], correct: 1 },
+            { q: "El proceso por el cual el agua líquida pasa a vapor se llama:", options: ["Condensación", "Sublimación", "Evaporación", "Precipitación"], correct: 2 },
+            { q: "¿Qué escala mide la magnitud de los terremotos?", options: ["Escala de Mohs", "Escala de Richter", "Escala Kelvin", "Escala de Beaufort"], correct: 1 },
+            { q: "¿Qué mineral es el más duro según la escala de Mohs?", options: ["Cuarzo", "Corindón", "Diamante", "Topacio"], correct: 2 },
+            { q: "Las rocas formadas por el enfriamiento del magma o lava se llaman:", options: ["Rocas ígneas", "Rocas sedimentarias", "Rocas metamórficas", "Rocas fósiles"], correct: 0 },
+            { q: "¿Cuál es el océano más grande del planeta Tierra?", options: ["Océano Atlántico", "Océano Pacífico", "Océano Índico", "Océano Ártico"], correct: 1 },
+            { q: "¿Qué gas forma la capa que protege a la Tierra de la radiación UV?", options: ["Metano", "Ozono", "Helio", "Hidrógeno"], correct: 1 },
+            { q: "El ciclo continuo de circulación del agua en la Tierra es el ciclo:", options: ["Carbonatado", "Hidrológico", "Geológico", "Atmosférico"], correct: 1 },
+            { q: "¿Qué fenómeno es causado por la inclinación del eje terrestre?", options: ["Las mareas", "Las estaciones del año", "El día y la noche", "Los eclipses"], correct: 1 },
+            { q: "¿Qué continente alberga la mayor reserva de agua dulce en hielo?", options: ["Groenlandia", "América del Norte", "La Antártida", "Europa"], correct: 2 },
+            { q: "¿Qué fuerza mantiene a los planetas orbitando alrededor del Sol?", options: ["Fuerza electromagnética", "Fuerza nuclear", "Fuerza de Gravedad", "Fuerza centrífuga"], correct: 2 },
+            { q: "Los fragmentos de la litosfera que se desplazan lentamente son:", options: ["Placas tectónicas", "Fallas geológicas", "Cinturones de fuego", "Dorsales"], correct: 0 },
+            { q: "¿Qué tipo de roca es el mármol?", options: ["Sedimentaria", "Ígnea", "Metamórfica", "Volcánica"], correct: 2 },
+            { q: "¿Qué instrumento sirve para medir la presión atmosférica?", options: ["Anemómetro", "Barómetro", "Higrómetro", "Termómetro"], correct: 1 },
+            { q: "¿Qué porcentaje aproximado de la Tierra está cubierta por agua?", options: ["50%", "71%", "85%", "60%"], correct: 1 },
+            { q: "¿Cuál es considerado el río más largo y caudaloso del mundo?", options: ["Río Nilo", "Río Misisipi", "Río Amazonas", "Río Yangtze"], correct: 2 },
+            { q: "El punto en la superficie justo sobre el foco de un sismo es el:", options: ["Hipocentro", "Epicentro", "Falla principal", "Cráter"], correct: 1 },
+            { q: "Capa atmosférica donde ocurren la mayoría de los fenómenos meteorológicos:", options: ["Estratósfera", "Troposfera", "Termósfera", "Exósfera"], correct: 1 },
+            { q: "¿Qué gas vital expulsan las plantas durante la fotosíntesis?", options: ["Dióxido de carbono", "Nitrógeno", "Oxígeno", "Vapor de agua"], correct: 2 },
+            { q: "El desgaste de rocas y suelo por viento y agua se conoce como:", options: ["Sedimentación", "Erosión", "Erupción", "Meteorización química"], correct: 1 },
+            { q: "La capa más profunda del interior de la Tierra es el:", options: ["Manto", "Corteza", "Núcleo", "Astenosfera"], correct: 2 },
+            { q: "Corriente marina cálida que influye en el clima del Atlántico Norte:", options: ["Corriente de Humboldt", "Corriente del Golfo", "Corriente de California", "Corriente de Benguela"], correct: 1 },
+            { q: "Gas de efecto invernadero liberado principalmente al quemar fósiles:", options: ["Oxígeno", "Dióxido de carbono", "Neón", "Argón"], correct: 1 },
+            { q: "¿Cómo se llamaba el supercontinente existente hace 300 millones de años?", options: ["Pangea", "Laurasia", "Gondwana", "Rhodinia"], correct: 0 },
+            { q: "¿Qué instrumento mide la velocidad del viento?", options: ["Barómetro", "Anemómetro", "Pluviómetro", "Sonar"], correct: 1 },
+            { q: "Rocas formadas por acumulación y compactación de sedimentos y restos:", options: ["Rocas Ígneas", "Rocas Sedimentarias", "Rocas Metamórficas", "Rocas Basálticas"], correct: 1 },
+            { q: "La capa de rocas permeables que almacena agua subterránea se llama:", options: ["Acuífero", "Gaceta", "Manantial", "Fosa oceánica"], correct: 0 },
+            { q: "Ocurre cuando la Luna se interpone exactamente entre el Sol y la Tierra:", options: ["Eclipse Lunar", "Eclipse Solar", "Equinoccio", "Solsticio"], correct: 1 },
+            { q: "¿Cuál es el mineral más abundante en la corteza terrestre?", options: ["Cuarzo", "Feldespato", "Calcita", "Mica"], correct: 1 }
+        ];
+
+        /* Question Queue Shuffler */
+        let questionQueue = [];
+        function refreshQuestionQueue() {
+            questionQueue = [...EARTH_QUESTIONS].sort(() => Math.random() - 0.5);
+        }
+        refreshQuestionQueue();
+
+        /* ===================================================================
+           4. SPACESHIP SHOP CATALOGUE
+           =================================================================== */
+        const SHIPS_CATALOG = [
+            {
+                id: 1,
+                name: "Alpha Explorer",
+                cost: 0,
+                speed: 1.0,
+                jump: 1.0,
+                desc: "Nave estándar de exploración fácil de maniobrar.",
+                colorPrimary: "#00d2ff",
+                colorSecondary: "#ffffff"
+            },
+            {
+                id: 2,
+                name: "Nebula Speeder",
+                cost: 150,
+                speed: 1.25,
+                jump: 1.10,
+                desc: "Aceleración mejorada y mejor maniobrabilidad aérea.",
+                colorPrimary: "#a855f7",
+                colorSecondary: "#06b6d4"
+            },
+            {
+                id: 3,
+                name: "Cosmic Falcon",
+                cost: 350,
+                speed: 1.40,
+                jump: 1.20,
+                desc: "Caza espacial con potentes propulsores antigravedad.",
+                colorPrimary: "#eab308",
+                colorSecondary: "#f97316"
+            },
+            {
+                id: 4,
+                name: "Supernova Orion",
+                cost: 600,
+                speed: 1.60,
+                jump: 1.35,
+                desc: "Nave nodriza definitiva con la máxima energía de propulsión.",
+                colorPrimary: "#ec4899",
+                colorSecondary: "#3b82f6"
+            }
+        ];
+
+        /* ===================================================================
+           5. GAME ENGINE STATE MACHINE & CENTRAL RAF LOOP (FIXES GARAGE FREEZE)
+           =================================================================== */
+        const STATES = {
+            MENU: 'MENU',
+            GARAGE: 'GARAGE',
+            PLAYING: 'PLAYING',
+            TRIVIA: 'TRIVIA',
+            GAMEOVER: 'GAMEOVER'
+        };
+
+        let currentGameState = STATES.MENU;
+        let lastTime = 0;
+        let animationFrameId = null;
+
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // UI DOM References
+        const menuScreen = document.getElementById('menuScreen');
+        const garageScreen = document.getElementById('garageScreen');
+        const hudOverlay = document.getElementById('hudOverlay');
+        const triviaModal = document.getElementById('triviaModal');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const toastNotification = document.getElementById('toastNotification');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Toast Helper
+        let toastTimeout = null;
+        function showToast(msg) {
+            toastMessage.textContent = msg;
+            toastNotification.classList.remove('hidden');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastNotification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Global State Transition Function
+        function setGameState(newState) {
+            currentGameState = newState;
+            // Reset frame timer to prevent delta-time spikes or freezes!
+            lastTime = performance.now();
+
+            // Hide all screen overlays
+            menuScreen.classList.add('hidden');
+            garageScreen.classList.add('hidden');
+            hudOverlay.classList.add('hidden');
+            triviaModal.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+
+            // Reset keys state
+            keys.left = false;
+            keys.right = false;
+
+            if (newState === STATES.MENU) {
+                menuScreen.classList.remove('hidden');
+                document.getElementById('menuHighScore').textContent = Math.floor(appData.highScore) + ' m';
+                document.getElementById('menuCoinBalance').textContent = appData.coins;
+            } else if (newState === STATES.GARAGE) {
+                garageScreen.classList.remove('hidden');
+                renderGarageUI();
+            } else if (newState === STATES.PLAYING) {
+                hudOverlay.classList.remove('hidden');
+            } else if (newState === STATES.TRIVIA) {
+                hudOverlay.classList.remove('hidden');
+                triviaModal.classList.remove('hidden');
+            } else if (newState === STATES.GAMEOVER) {
+                gameOverScreen.classList.remove('hidden');
+                renderGameOverUI();
+            }
+        }
+
+        /* ===================================================================
+           6. GAME WORLD OBJECTS & ATMOSPHERIC ZONES
+           =================================================================== */
+        let player = null;
+        let platforms = [];
+        let coins = [];
+        let meteorites = [];
+        let particles = [];
+        let cameraY = 0;
+        let currentZoneIndex = 0;
+        let triviaCountdownTimer = 5.0; // 15s auto-trivia
+        let triviaCorrectCount = 0;
+        let superTurboTimer = 0; // 60s turbo duration
+        let sessionCoins = 0;
+        let currentQuestion = null;
+        let triviaModalTimer = 30.0; // 30s timer to answer question
+        let triviaInterval = null;
+
+        // Background Starfield
+        const bgStars = [];
+        for (let i = 0; i < 120; i++) {
+            bgStars.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                size: Math.random() * 2.5 + 0.5,
+                alpha: Math.random() * 0.8 + 0.2,
+                speed: Math.random() * 0.3 + 0.1
+            });
+        }
+
+        // Space Zones Settings
+        const ZONES = [
+            { name: "Tierra", minH: 0, bgTop: "#0f172a", bgBottom: "#1e3a8a", platColor: "#22c55e", platBorder: "#86efac" },
+            { name: "Estratósfera", minH: 300, bgTop: "#030712", bgBottom: "#1e1b4b", platColor: "#38bdf8", platBorder: "#bae6fd" },
+            { name: "Luna", minH: 700, bgTop: "#020617", bgBottom: "#0f172a", platColor: "#94a3b8", platBorder: "#e2e8f0" },
+            { name: "Marte", minH: 1200, bgTop: "#180202", bgBottom: "#450a0a", platColor: "#f97316", platBorder: "#ffedd5" },
+            { name: "Júpiter", minH: 1800, bgTop: "#1a0a00", bgBottom: "#451a03", platColor: "#eab308", platBorder: "#fef08a" }
+        ];
+
+        function getZoneForHeight(height) {
+            for (let i = ZONES.length - 1; i >= 0; i--) {
+                if (height >= ZONES[i].minH) return { zone: ZONES[i], index: i };
+            }
+            return { zone: ZONES[0], index: 0 };
+        }
+
+        /* Initialize / Restart Game Run */
+        function initGame() {
+            const equipped = SHIPS_CATALOG.find(s => s.id === appData.equippedShip) || SHIPS_CATALOG[0];
+
+            player = {
+                x: canvas.width / 2,
+                y: canvas.height - 200,
+                vx: 0,
+                vy: 0,
+                width: 44,
+                height: 52,
+                baseSpeed: 500 * equipped.speed,
+                jumpImpulse: 820 * equipped.jump,
+                jumpCharges: 3,
+                maxJumpCharges: 3,
+                maxHeightReached: 0,
+                shipSpec: equipped
+            };
+
+            cameraY = 0;
+            sessionCoins = 0;
+            triviaCorrectCount = 0;
+            superTurboTimer = 0;
+            triviaCountdownTimer = 5.0;
+            currentZoneIndex = 0;
+
+            platforms = [];
+            coins = [];
+            meteorites = [];
+            particles = [];
+
+            // Spawn Initial Base Platform
+            platforms.push({
+                x: canvas.width / 2 - 120,
+                y: canvas.height - 100,
+                width: 240,
+                height: 20,
+                type: 'normal'
+            });
+
+            // Generate Initial Platform Cascade
+            let currentY = canvas.height - 100;
+            for (let i = 0; i < 25; i++) {
+                currentY -= Math.random() * 80 + 70;
+                spawnPlatformAt(currentY);
+            }
+
+            updateHUD();
+            setGameState(STATES.PLAYING);
+        }
+
+        function spawnPlatformAt(yPos) {
+            const width = Math.random() * 40 + 80; // 80 - 120px
+            const x = Math.random() * (canvas.width - width - 40) + 20;
+            const rand = Math.random();
+            let type = 'normal';
+
+            if (rand < 0.2) type = 'moving';
+            else if (rand < 0.32) type = 'spring';
+            else if (rand < 0.42) type = 'fragile';
+
+            platforms.push({
+                x: x,
+                y: yPos,
+                width: width,
+                height: 18,
+                type: type,
+                vx: type === 'moving' ? (Math.random() > 0.5 ? 120 : -120) : 0,
+                broken: false
+            });
+
+            // Random Coin on top of platform
+            if (Math.random() < 0.55) {
+                coins.push({
+                    x: x + width / 2,
+                    y: yPos - 25,
+                    radius: 12,
+                    collected: false
+                });
+            }
+        }
+
+        /* ===================================================================
+           7. DRAWING ROUTINES (SPACESHIPS, PLATFORMS, METEORITES)
+           =================================================================== */
+        function drawSpaceship(ctx, spec, x, y, width, height, isAccelerating) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Thruster Flames
+            if (isAccelerating || superTurboTimer > 0) {
+                ctx.save();
+                const flameLength = superTurboTimer > 0 ? 35 + Math.random() * 20 : 20 + Math.random() * 10;
+                const grad = ctx.createLinearGradient(0, height / 2, 0, height / 2 + flameLength);
+                grad.addColorStop(0, '#ffe100');
+                grad.addColorStop(0.5, '#ff5500');
+                grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.moveTo(-width * 0.25, height / 2 - 2);
+                ctx.lineTo(0, height / 2 + flameLength);
+                ctx.lineTo(width * 0.25, height / 2 - 2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Draw Ship Body based on Catalog ID
+            if (spec.id === 1) { // Alpha Explorer
+                // Sleek rocket body
+                ctx.fillStyle = spec.colorPrimary;
+                ctx.beginPath();
+                ctx.moveTo(0, -height / 2);
+                ctx.quadraticCurveTo(width / 2, -height / 4, width / 2, height / 3);
+                ctx.lineTo(-width / 2, height / 3);
+                ctx.quadraticCurveTo(-width / 2, -height / 4, 0, -height / 2);
+                ctx.fill();
+
+                // Wings
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.moveTo(-width / 2, 0);
+                ctx.lineTo(-width * 0.8, height / 2);
+                ctx.lineTo(-width / 2, height / 3);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(width / 2, 0);
+                ctx.lineTo(width * 0.8, height / 2);
+                ctx.lineTo(width / 2, height / 3);
+                ctx.fill();
+
+                // Cockpit Bubble
+                ctx.fillStyle = spec.colorSecondary;
+                ctx.beginPath();
+                ctx.arc(0, -height / 6, width / 4, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else if (spec.id === 2) { // Nebula Speeder
+                // Double wing jet
+                ctx.fillStyle = spec.colorPrimary;
+                ctx.beginPath();
+                ctx.moveTo(0, -height / 2);
+                ctx.lineTo(width * 0.7, height / 2);
+                ctx.lineTo(0, height / 3);
+                ctx.lineTo(-width * 0.7, height / 2);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = spec.colorSecondary;
+                ctx.beginPath();
+                ctx.moveTo(0, -height / 3);
+                ctx.lineTo(width * 0.25, height / 4);
+                ctx.lineTo(-width * 0.25, height / 4);
+                ctx.closePath();
+                ctx.fill();
+
+            } else if (spec.id === 3) { // Cosmic Falcon
+                // Delta stealth wing
+                ctx.fillStyle = spec.colorPrimary;
+                ctx.beginPath();
+                ctx.moveTo(0, -height / 2);
+                ctx.lineTo(width * 0.85, height / 2.5);
+                ctx.lineTo(width * 0.4, height / 2);
+                ctx.lineTo(0, height / 3);
+                ctx.lineTo(-width * 0.4, height / 2);
+                ctx.lineTo(-width * 0.85, height / 2.5);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, -height / 8, width / 5, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else { // Supernova Orion (Ship 4)
+                // Plasma flagship
+                ctx.fillStyle = spec.colorPrimary;
+                ctx.beginPath();
+                ctx.moveTo(0, -height / 2);
+                ctx.lineTo(width * 0.6, -height / 6);
+                ctx.lineTo(width * 0.9, height / 2);
+                ctx.lineTo(0, height / 4);
+                ctx.lineTo(-width * 0.9, height / 2);
+                ctx.lineTo(-width * 0.6, -height / 6);
+                ctx.closePath();
+                ctx.fill();
+
+                // Plasma core
+                ctx.fillStyle = spec.colorSecondary;
+                ctx.beginPath();
+                ctx.arc(0, 0, width / 3.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        /* ===================================================================
+           8. INPUT HANDLING (KEYBOARD & MOBILE TOUCH)
+           =================================================================== */
+        const keys = { left: false, right: false };
+
+        window.addEventListener('keydown', (e) => {
+            initAudio();
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                triggerJump();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+        });
+
+        // Touch Control Listeners
+        const btnLeft = document.getElementById('btnTouchLeft');
+        const btnRight = document.getElementById('btnTouchRight');
+        const btnJump = document.getElementById('btnTouchJump');
+
+        function setupTouchBtn(btn, onStart, onEnd) {
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); initAudio(); onStart(); });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
+            btn.addEventListener('mousedown', () => { initAudio(); onStart(); });
+            btn.addEventListener('mouseup', () => { onEnd(); });
+        }
+
+        setupTouchBtn(btnLeft, () => { keys.left = true; }, () => { keys.left = false; });
+        setupTouchBtn(btnRight, () => { keys.right = true; }, () => { keys.right = false; });
+        setupTouchBtn(btnJump, () => { triggerJump(); }, () => {});
+
+        function triggerJump() {
+            if (currentGameState !== STATES.PLAYING || !player) return;
+            if (player.jumpCharges > 0) {
+                player.vy = -player.jumpImpulse;
+                player.jumpCharges--;
+                playSound('jump');
+                updateHUD();
+
+                // Particle boost
+                for (let i = 0; i < 8; i++) {
+                    particles.push({
+                        x: player.x,
+                        y: player.y + player.height / 2,
+                        vx: (Math.random() - 0.5) * 120,
+                        vy: Math.random() * 150 + 100,
+                        radius: Math.random() * 4 + 2,
+                        color: '#38bdf8',
+                        life: 0.3
+                    });
+                }
+            }
+        }
+
+        /* ===================================================================
+           9. PHYSICS ENGINE & GAMEPLAY UPDATE LOOP
+           =================================================================== */
+        function updateGame(dt) {
+            if (!player) return;
+
+            // Super Turbo Boost Logic (60s)
+            if (superTurboTimer > 0) {
+                superTurboTimer -= dt;
+                player.vy = -1100; // Continuous upwards rocket speed
+                player.jumpCharges = player.maxJumpCharges;
+                if (superTurboTimer <= 0) {
+                    superTurboTimer = 0;
+                    document.getElementById('hudTurboBanner').classList.add('hidden');
+                } else {
+                    document.getElementById('hudTurboBanner').classList.remove('hidden');
+                    document.getElementById('hudTurboBar').style.width = ((superTurboTimer / 60) * 100) + '%';
+                }
+            } else {
+                // Apply Gravity
+                player.vy += 1800 * dt;
+            }
+
+            // Horizontal Movement
+            player.vx = 0;
+            if (keys.left) player.vx = -player.baseSpeed;
+            if (keys.right) player.vx = player.baseSpeed;
+
+            player.x += player.vx * dt;
+            player.y += player.vy * dt;
+
+            // Canvas Screen Wrapping (Teleport Left <-> Right)
+            if (player.x < -player.width / 2) player.x = canvas.width + player.width / 2;
+            if (player.x > canvas.width + player.width / 2) player.x = -player.width / 2;
+
+            // Camera Tracking (Smooth upward scrolling)
+            const targetCamY = player.y - canvas.height * 0.55;
+            if (targetCamY < cameraY) {
+                cameraY = targetCamY;
+            }
+
+            // Calculate Reached Height (Meters)
+            const heightMeters = Math.floor(-cameraY / 10);
+            if (heightMeters > player.maxHeightReached) {
+                player.maxHeightReached = heightMeters;
+            }
+
+            // Update Zone
+            const zoneInfo = getZoneForHeight(player.maxHeightReached);
+            currentZoneIndex = zoneInfo.index;
+
+            // Spawn meteorites in space zones (Luna, Marte, Júpiter)
+            if (currentZoneIndex >= 2 && Math.random() < 0.02) {
+                meteorites.push({
+                    x: Math.random() * (canvas.width + 200) - 100,
+                    y: cameraY - 50,
+                    vx: (Math.random() - 0.5) * 150 - 100,
+                    vy: Math.random() * 200 + 250,
+                    radius: Math.random() * 12 + 10
+                });
+            }
+
+            // Update Meteorites
+            for (let i = meteorites.length - 1; i >= 0; i--) {
+                const m = meteorites[i];
+                m.x += m.vx * dt;
+                m.y += m.vy * dt;
+
+                // Collision with player
+                const dist = Math.hypot(player.x - m.x, player.y - m.y);
+                if (dist < m.radius + player.width / 2) {
+                    if (superTurboTimer > 0) {
+                        // Destroy meteorite in Turbo Mode
+                        meteorites.splice(i, 1);
+                        playSound('explosion');
+                        // Spawn bonus coins
+                        coins.push({ x: m.x, y: m.y, radius: 12, collected: false });
+                    } else {
+                        // Player explosion & Game Over
+                        triggerExplosion(player.x, player.y);
+                        playSound('explosion');
+                        setGameState(STATES.GAMEOVER);
+                        return;
+                    }
+                } else if (m.y > cameraY + canvas.height + 100) {
+                    meteorites.splice(i, 1);
+                }
+            }
+
+            // Platform Collision & Updates
+            platforms.forEach(p => {
+                if (p.type === 'moving') {
+                    p.x += p.vx * dt;
+                    if (p.x < 20 || p.x + p.width > canvas.width - 20) p.vx *= -1;
+                }
+
+                // Landing on platform from above
+                if (player.vy > 0 &&
+                    player.x + player.width / 3 > p.x &&
+                    player.x - player.width / 3 < p.x + p.width &&
+                    player.y + player.height / 2 >= p.y &&
+                    player.y + player.height / 2 <= p.y + p.height + player.vy * dt) {
+
+                    if (p.type === 'spring') {
+                        player.vy = -player.jumpImpulse * 1.5;
+                        playSound('spring');
+                    } else if (p.type === 'fragile') {
+                        p.broken = true;
+                        player.vy = -player.jumpImpulse;
+                        playSound('jump');
+                    } else {
+                        player.vy = -player.jumpImpulse;
+                        playSound('jump');
+                    }
+
+                    // Recharge Jump Battery Charges to 100%!
+                    player.jumpCharges = player.maxJumpCharges;
+                    updateHUD();
+                }
+            });
+
+            // Clean broken or offscreen platforms & spawn new ones above
+            platforms = platforms.filter(p => !p.broken && p.y < cameraY + canvas.height + 100);
+
+            let topPlatformY = Math.min(...platforms.map(p => p.y), cameraY);
+            while (topPlatformY > cameraY - 200) {
+                topPlatformY -= Math.random() * 80 + 70;
+                spawnPlatformAt(topPlatformY);
+            }
+
+            // Update & Magnetize Coins
+            for (let i = coins.length - 1; i >= 0; i--) {
+                const c = coins[i];
+
+                // Magnetize towards player during Turbo Mode
+                if (superTurboTimer > 0) {
+                    const dx = player.x - c.x;
+                    const dy = player.y - c.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 350) {
+                        c.x += (dx / dist) * 800 * dt;
+                        c.y += (dy / dist) * 800 * dt;
+                    }
+                }
+
+                const dist = Math.hypot(player.x - c.x, player.y - c.y);
+                if (dist < c.radius + player.width / 2 && !c.collected) {
+                    c.collected = true;
+                    sessionCoins++;
+                    appData.coins++;
+                    saveData(appData);
+                    playSound('coin');
+                    updateHUD();
+                }
+            }
+            coins = coins.filter(c => !c.collected && c.y < cameraY + canvas.height + 100);
+
+            // Update Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.life -= dt;
+                if (pt.life <= 0) particles.splice(i, 1);
+            }
+
+            // Check Game Over (Falling below camera viewport)
+            if (player.y > cameraY + canvas.height + 80) {
+                playSound('explosion');
+                setGameState(STATES.GAMEOVER);
+                return;
+            }
+
+            // Automatic 5-Second Trivia Countdown
+            if (superTurboTimer <= 0) {
+                triviaCountdownTimer -= dt;
+                if (triviaCountdownTimer <= 0) {
+                    triviaCountdownTimer = 5.0;
+                    openTriviaModal();
+                    return;
+                }
+            }
+
+            updateHUD();
+        }
+
+        /* Particle Explosion Effect */
+        function triggerExplosion(x, y) {
+            for (let i = 0; i < 35; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 500,
+                    vy: (Math.random() - 0.5) * 500,
+                    radius: Math.random() * 6 + 3,
+                    color: Math.random() > 0.5 ? '#ff4d4d' : '#ffaa00',
+                    life: 0.6
+                });
+            }
+        }
+
+        /* Update HUD Overlay Displays */
+        function updateHUD() {
+            if (!player) return;
+            document.getElementById('hudHeight').textContent = player.maxHeightReached + ' m';
+            document.getElementById('hudCoins').textContent = sessionCoins;
+            document.getElementById('hudZone').textContent = ZONES[currentZoneIndex].name;
+            document.getElementById('hudTriviaCountdown').textContent = Math.ceil(triviaCountdownTimer) + 's';
+
+            // Update Jump Batteries Display
+            for (let i = 1; i <= 3; i++) {
+                const bat = document.getElementById(`battery${i}`);
+                if (i <= player.jumpCharges) {
+                    bat.className = "w-6 h-8 rounded-md bg-emerald-400 border border-emerald-200 shadow-lg shadow-emerald-500/50";
+                } else {
+                    bat.className = "w-6 h-8 rounded-md bg-slate-800 border border-slate-700 opacity-40";
+                }
+            }
+        }
+
+        /* ===================================================================
+           10. TRIVIA MODAL LOGIC & SUPER TURBO TRIGGER
+           =================================================================== */
+        function openTriviaModal() {
+            setGameState(STATES.TRIVIA);
+
+            if (questionQueue.length === 0) refreshQuestionQueue();
+            currentQuestion = questionQueue.pop();
+
+            document.getElementById('triviaQuestionText').textContent = currentQuestion.q;
+
+            const container = document.getElementById('triviaOptionsContainer');
+            container.innerHTML = '';
+
+            currentQuestion.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-glossy btn-blue w-full py-3.5 px-4 text-left font-semibold text-base sm:text-lg flex items-center justify-between';
+                btn.innerHTML = `<span>${opt}</span><i class="fa-solid fa-chevron-right text-xs opacity-60"></i>`;
+                btn.onclick = () => answerTrivia(idx);
+                container.appendChild(btn);
+            });
+
+            // Start 30s Modal Timer
+            triviaModalTimer = 30.0;
+            if (triviaInterval) clearInterval(triviaInterval);
+            triviaInterval = setInterval(() => {
+                triviaModalTimer -= 0.1;
+                const bar = document.getElementById('triviaTimerBar');
+                if (bar) bar.style.width = Math.max(0, (triviaModalTimer / 30) * 100) + '%';
+
+                if (triviaModalTimer <= 0) {
+                    clearInterval(triviaInterval);
+                    playSound('wrong');
+                    triggerExplosion(player.x, player.y);
+                    setGameState(STATES.GAMEOVER);
+                }
+            }, 100);
+        }
+
+        function answerTrivia(selectedIndex) {
+            if (triviaInterval) clearInterval(triviaInterval);
+
+            if (selectedIndex === currentQuestion.correct) {
+                // Correct Answer!
+                playSound('correct');
+                triviaCorrectCount++;
+                appData.totalTriviaCorrect++;
+                saveData(appData);
+
+                showToast('¡RESPUESTA CORRECTA! +100 PUNTOS');
+
+                // Check for 5 Correct Answers -> Activate 60s Super Turbo!
+                if (triviaCorrectCount > 0 && triviaCorrectCount % 5 === 0) {
+                    superTurboTimer = 60.0; // 60s continuous turbo
+                    playSound('turbo');
+                    showToast('🚀 ¡SUPER TURBO BOOST ACTIVADO (60s)!');
+                }
+
+                setGameState(STATES.PLAYING);
+            } else {
+                // Incorrect Answer -> Ship Explodes!
+                playSound('wrong');
+                triggerExplosion(player.x, player.y);
+                setGameState(STATES.GAMEOVER);
+            }
+        }
+
+        /* ===================================================================
+           11. MAIN CANVAS RENDERER
+           =================================================================== */
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dynamic Atmospheric Gradient Background
+            const currentZone = ZONES[currentZoneIndex] || ZONES[0];
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrad.addColorStop(0, currentZone.bgTop);
+            bgGrad.addColorStop(1, currentZone.bgBottom);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Render Stars
+            ctx.save();
+            bgStars.forEach(s => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+                ctx.beginPath();
+                ctx.arc(s.x, (s.y - cameraY * s.speed) % canvas.height, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+
+            // Render Game World elements during PLAYING, TRIVIA, or GAMEOVER
+            if (currentGameState === STATES.PLAYING || currentGameState === STATES.TRIVIA || currentGameState === STATES.GAMEOVER) {
+                ctx.save();
+                ctx.translate(0, -cameraY);
+
+                // Render Platforms
+                platforms.forEach(p => {
+                    ctx.fillStyle = currentZone.platColor;
+                    ctx.strokeStyle = currentZone.platBorder;
+                    ctx.lineWidth = 3;
+
+                    // Rounded Platform Rect
+                    ctx.beginPath();
+                    ctx.roundRect(p.x, p.y, p.width, p.height, 8);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    if (p.type === 'spring') {
+                        // Spring coils
+                        ctx.fillStyle = '#eab308';
+                        ctx.fillRect(p.x + p.width / 2 - 10, p.y - 8, 20, 8);
+                    } else if (p.type === 'fragile') {
+                        // Cracks line
+                        ctx.strokeStyle = '#ef4444';
+                        ctx.beginPath();
+                        ctx.moveTo(p.x + 10, p.y + p.height / 2);
+                        ctx.lineTo(p.x + p.width - 10, p.y + p.height / 2);
+                        ctx.stroke();
+                    }
+                });
+
+                // Render Coins
+                coins.forEach(c => {
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.strokeStyle = '#fef08a';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#fef08a';
+                    ctx.font = 'bold 10px Orbitron';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('$', c.x, c.y);
+                });
+
+                // Render Meteorites
+                meteorites.forEach(m => {
+                    ctx.fillStyle = '#ef4444';
+                    ctx.strokeStyle = '#f97316';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                });
+
+                // Render Particles
+                particles.forEach(pt => {
+                    ctx.fillStyle = pt.color;
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Render Player Ship
+                if (player) {
+                    drawSpaceship(ctx, player.shipSpec, player.x, player.y, player.width, player.height, keys.left || keys.right);
+                }
+
+                ctx.restore();
+            }
+        }
+
+        /* Central Master Loop (Smooth execution with delta clamping) */
+        function gameLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            let dt = (timestamp - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1; // Protect against lag spikes & freezes!
+            lastTime = timestamp;
+
+            if (currentGameState === STATES.PLAYING) {
+                updateGame(dt);
+            }
+
+            render();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        /* ===================================================================
+           12. GARAGE SHOP & GAME OVER SCREENS LOGIC
+           =================================================================== */
+        function renderGarageUI() {
+            document.getElementById('garageCoinBalance').textContent = appData.coins;
+            const container = document.getElementById('shipsContainer');
+            container.innerHTML = '';
+
+            SHIPS_CATALOG.forEach(ship => {
+                const isUnlocked = appData.unlockedShips.includes(ship.id);
+                const isEquipped = appData.equippedShip === ship.id;
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl bg-slate-900/90 border flex flex-col sm:flex-row items-center justify-between gap-4 ${isEquipped ? 'border-cyan-400 bg-cyan-950/20' : 'border-slate-800'}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-xl bg-slate-800 flex items-center justify-center p-2 border border-slate-700">
+                            <canvas id="shipPreview_${ship.id}" width="50" height="50"></canvas>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h4 class="font-bold font-orbitron text-base text-white">${ship.name}</h4>
+                                ${isEquipped ? '<span class="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-full font-bold">EQUIPADO</span>' : ''}
+                            </div>
+                            <p class="text-xs text-slate-400 max-w-xs mt-0.5">${ship.desc}</p>
+                            <div class="flex space-x-3 text-xs font-bold font-orbitron text-cyan-400 mt-1">
+                                <span>Velocidad: ${(ship.speed * 100).toFixed(0)}%</span>
+                                <span>Salto: ${(ship.jump * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full sm:w-auto flex justify-end">
+                        ${isEquipped ? `
+                            <button class="btn-glossy bg-slate-800 text-slate-400 px-5 py-2.5 text-sm cursor-default" disabled>EQUIPADO</button>
+                        ` : isUnlocked ? `
+                            <button onclick="equipShip(${ship.id})" class="btn-glossy btn-green px-5 py-2.5 text-sm">EQUIPAR</button>
+                        ` : `
+                            <button onclick="buyShip(${ship.id})" class="btn-glossy btn-yellow px-5 py-2.5 text-sm space-x-1.5">
+                                <i class="fa-solid fa-coins text-amber-600"></i>
+                                <span>${ship.cost}</span>
+                            </button>
+                        `}
+                    </div>
+                `;
+
+                container.appendChild(card);
+
+                // Render Canvas Preview Icon for Ship
+                setTimeout(() => {
+                    const previewCanvas = document.getElementById(`shipPreview_${ship.id}`);
+                    if (previewCanvas) {
+                        const pCtx = previewCanvas.getContext('2d');
+                        pCtx.clearRect(0, 0, 50, 50);
+                        drawSpaceship(pCtx, ship, 25, 25, 30, 36, false);
+                    }
+                }, 10);
+            });
+        }
+
+        function equipShip(shipId) {
+            initAudio();
+            appData.equippedShip = shipId;
+            saveData(appData);
+            renderGarageUI();
+            showToast('¡Nave equipada con éxito!');
+        }
+
+        function buyShip(shipId) {
+            initAudio();
+            const ship = SHIPS_CATALOG.find(s => s.id === shipId);
+            if (!ship) return;
+
+            if (appData.coins >= ship.cost) {
+                appData.coins -= ship.cost;
+                appData.unlockedShips.push(shipId);
+                appData.equippedShip = shipId;
+                saveData(appData);
+                playSound('correct');
+                renderGarageUI();
+                showToast(`¡Has comprado la nave ${ship.name}!`);
+            } else {
+                const missing = ship.cost - appData.coins;
+                playSound('wrong');
+                showToast(`¡Monedas insuficientes! Te faltan ${missing} monedas`);
+            }
+        }
+
+        function renderGameOverUI() {
+            if (player.maxHeightReached > appData.highScore) {
+                appData.highScore = player.maxHeightReached;
+                saveData(appData);
+            }
+
+            document.getElementById('goStatHeight').textContent = player.maxHeightReached + ' m';
+            document.getElementById('goStatTrivia').textContent = triviaCorrectCount;
+            document.getElementById('goStatCoins').textContent = '+' + sessionCoins;
+            document.getElementById('goStatTotalCoins').textContent = appData.coins;
+
+            // Missing coins calculation for next locked ship
+            const lockedShips = SHIPS_CATALOG.filter(s => !appData.unlockedShips.includes(s.id));
+            const banner = document.getElementById('goMissingCoinsBanner');
+
+            if (lockedShips.length > 0) {
+                lockedShips.sort((a, b) => a.cost - b.cost);
+                const nextShip = lockedShips[0];
+                const needed = Math.max(0, nextShip.cost - appData.coins);
+                if (needed > 0) {
+                    banner.innerHTML = `Te faltan <span class="text-amber-300 font-bold font-orbitron">${needed} 🪙</span> para desbloquear la nave <span class="text-cyan-300 font-bold">${nextShip.name}</span>!`;
+                } else {
+                    banner.innerHTML = `¡Tienes suficientes monedas para comprar la nave <span class="text-cyan-300 font-bold">${nextShip.name}</span> en el Garaje!`;
+                }
+            } else {
+                banner.textContent = '🏆 ¡Has desbloqueado todas las naves del garaje!';
+            }
+        }
+
+        /* ===================================================================
+           13. DOM EVENT LISTENERS & INITIALIZATION
+           =================================================================== */
+        document.getElementById('btnPlay').onclick = () => { initAudio(); initGame(); };
+        document.getElementById('btnGarage').onclick = () => { initAudio(); setGameState(STATES.GARAGE); };
+        document.getElementById('btnBackToMenu').onclick = () => { initAudio(); setGameState(STATES.MENU); };
+
+        document.getElementById('btnGoRetry').onclick = () => { initAudio(); initGame(); };
+        document.getElementById('btnGoGarage').onclick = () => { initAudio(); setGameState(STATES.GARAGE); };
+        document.getElementById('btnGoMenu').onclick = () => { initAudio(); setGameState(STATES.MENU); };
+
+        // Start Loop on Window Load
+        window.onload = () => {
+            setGameState(STATES.MENU);
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
